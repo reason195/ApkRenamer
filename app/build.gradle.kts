@@ -3,6 +3,18 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// 仅在 CI 注入完整的 release 签名变量时启用发布签名；本地仍可正常 assembleRelease。
+val releaseStoreFile = providers.environmentVariable("RELEASE_STORE_FILE").orNull
+val releaseStorePassword = providers.environmentVariable("RELEASE_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("RELEASE_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("RELEASE_KEY_PASSWORD").orNull
+val hasReleaseSigning = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.workbuddy.apkrenamer"
     compileSdk = 35
@@ -21,6 +33,9 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.maybeCreate("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -66,6 +81,14 @@ android {
     // ~/.android/debug.keystore 的文件锁（之前因此 AccessDenied 导致打包失败）。
     // 仅影响本地构建、不影响应用逻辑；恢复默认签名只需删除本块。
     signingConfigs {
+        val release = maybeCreate("release")
+        if (hasReleaseSigning) {
+            release.storeFile = file(requireNotNull(releaseStoreFile))
+            release.storePassword = requireNotNull(releaseStorePassword)
+            release.keyAlias = requireNotNull(releaseKeyAlias)
+            release.keyPassword = requireNotNull(releaseKeyPassword)
+        }
+
         getByName("debug") {
             storeFile = file("$rootDir/.buildcheck/debug.keystore")
             storePassword = "android"

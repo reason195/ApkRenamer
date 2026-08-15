@@ -1,4 +1,10 @@
-# APK Renamer · Kotlin + 协程 + LruCache
+# APK Renamer — Android 批量 APK 重命名工具
+
+![APK Renamer：面向 Android 手机与 Android TV 的批量 APK 重命名工具](assets/apk-renamer-hero.png)
+
+> **APK Renamer** 是一款适用于 **Android 手机与 Android TV** 的批量 APK 文件重命名工具。它原生支持 `.apk`、`.apkm`、`.apks` 与 `.xapk`，基于 Kotlin 与 Storage Access Framework（SAF）实现，**无需存储权限、无需 root**。
+>
+> **APK Renamer** is a privacy-friendly Kotlin app for batch-renaming APK packages on Android phones and Android TV. It supports APK, APKM, APKS, and XAPK files with zero storage permissions and no root required.
 
 [![CI](https://github.com/reason195/ApkRenamer/actions/workflows/ci.yml/badge.svg)](https://github.com/reason195/ApkRenamer/actions/workflows/ci.yml)
 [![Android](https://img.shields.io/badge/Android-Platform-3DDC84?logo=android&logoColor=white)](https://www.android.com/)
@@ -260,6 +266,25 @@ ApkItem 原始集合
 - 构建环境相关目录：`.buildcheck/` 存放本地隔离的 Temurin JDK 17、Gradle 8.7 以及
   `debug.keystore`（本地 debug 签名用，避免与其它 Gradle/Studio 实例争用 `~/.android` 的文件锁）；
   `gradle/` 是 Gradle Wrapper 脚本与配置（构建必需，不可删除，否则 `./gradlew` 无法运行）。
+
+### 发布 APK
+
+向 `origin` 推送任意 Git tag（例如 `v1.0.0`）会触发 **Release APK** 工作流：它使用 JDK 17 执行 `:app:assembleRelease`，创建同名 GitHub Release，并附带 APK 与 SHA-256 校验文件。
+
+默认情况下工作流会发布名称含 `-unsigned` 的未签名 APK，便于先验证自动化链路。若要发布可安装的正式版本，请在仓库的 Actions secrets 中同时配置下列四项；工作流会自动解码签名文件并产出已签名 APK。
+
+| Secret | 说明 |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | release keystore 文件的 Base64 编码文本 |
+| `ANDROID_KEYSTORE_PASSWORD` | keystore 密码 |
+| `ANDROID_KEY_ALIAS` | 签名密钥别名 |
+| `ANDROID_KEY_PASSWORD` | 密钥密码 |
+
+```bash
+# 示例：创建并推送一个发布标签
+git tag v1.0.0
+git push origin v1.0.0
+```
 
 ### 测试分层
 

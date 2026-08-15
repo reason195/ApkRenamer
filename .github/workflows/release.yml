@@ -1,0 +1,106 @@
+---
+name: Release APK
+
+on:
+  push:
+    tags:
+      - "*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Restore optional release signing key
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${ANDROID_KEYSTORE_BASE64}" ]]; then
+            echo "SIGNED_RELEASE=false" >> "$GITHUB_ENV"
+            echo "::warning::No Android signing secrets found; the release APK will be uploaded as unsigned."
+            exit 0
+          fi
+
+          for secret_name in ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [[ -z "${!secret_name}" ]]; then
+              echo "::error::${secret_name} must be set when ANDROID_KEYSTORE_BASE64 is provided."
+              exit 1
+            fi
+          done
+
+          keystore_path="$RUNNER_TEMP/apkrenamer-release.keystore"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          echo "RELEASE_STORE_FILE=$keystore_path" >> "$GITHUB_ENV"
+          echo "RELEASE_STORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "RELEASE_KEY_ALIAS=$ANDROID_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "RELEASE_KEY_PASSWORD=$ANDROID_KEY_PASSWORD" >> "$GITHUB_ENV"
+          echo "SIGNED_RELEASE=true" >> "$GITHUB_ENV"
+
+      - name: Assemble release APK
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace --max-workers 2 -Dorg.gradle.parallel=false
+
+      - name: Package release assets
+        id: package
+        shell: bash
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          apk_path="$(find app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          if [[ -z "$apk_path" ]]; then
+            echo "::error::Release APK was not produced."
+            exit 1
+          fi
+
+          safe_tag="${TAG_NAME//\//-}"
+          suffix=""
+          if [[ "${SIGNED_RELEASE}" != "true" ]]; then
+            suffix="-unsigned"
+          fi
+          output_path="dist/ApkRenamer-${safe_tag}${suffix}.apk"
+          cp "$apk_path" "$output_path"
+          sha256sum "$output_path" > "${output_path}.sha256"
+
+          echo "apk=$output_path" >> "$GITHUB_OUTPUT"
+          echo "signed=${SIGNED_RELEASE}" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          name: APK Renamer ${{ github.ref_name }}
+          body: |
+            Automated APK build for `${{ github.ref_name }}`.
+
+            Signed release: `${{ steps.package.outputs.signed }}`.
+            Verify the APK with the accompanying `.sha256` file before installation.
+          files: |
+            ${{ steps.package.outputs.apk }}
+            ${{ steps.package.outputs.apk }}.sha256
