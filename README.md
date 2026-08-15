@@ -1,9 +1,11 @@
 # APK Renamer · Kotlin + 协程 + LruCache
 
+[![CI](https://github.com/reason195/ApkRenamer/actions/workflows/ci.yml/badge.svg)](https://github.com/reason195/ApkRenamer/actions/workflows/ci.yml)
 [![Android](https://img.shields.io/badge/Android-Platform-3DDC84?logo=android&logoColor=white)](https://www.android.com/)
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![SDK](https://img.shields.io/badge/SDK-minSdk%2021%20%C2%B7%20targetSdk%2035-3DDC84)]()
 [![Permissions](https://img.shields.io/badge/Permissions-none-brightgreen)]()
+[![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
 
 Android 批量 APK 重命名工具，**手机 + Android TV 双端**共用同一个状态源。100% Kotlin、
 零存储权限、零第三方解析库，无需 root —— 天然适配 Android 10~15 分区存储与 USB OTG 挂载盘。
@@ -279,3 +281,12 @@ ApkItem 原始集合
   fork 启动开销），多核 CI 上可显著缩短全量耗时。
 - 依赖：`junit:junit:4.13.2` + `org.robolectric:robolectric:4.14.1`。
 - 测试源集不再有同名的 `android.net.Uri`，`kotlin.incremental` 已恢复默认（增量编译开启）。
+
+---
+
+## 十、License
+
+本项目以 [Apache License 2.0](LICENSE) 开源，Copyright 2026 reason195。
+你可以自由使用、修改与再分发，但需保留版权声明与许可文本；按需
+[提交 Issue](https://github.com/reason195/ApkRenamer/issues) 或在
+[GitHub Discussions](https://github.com/reason195/ApkRenamer/discussions) 讨论。
