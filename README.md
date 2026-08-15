@@ -1,6 +1,24 @@
 # APK Renamer · Kotlin + 协程 + LruCache
 
-Android 批量 APK 重命名工具。100% Kotlin、零存储权限、零第三方解析库。
+[![Android](https://img.shields.io/badge/Android-Platform-3DDC84?logo=android&logoColor=white)](https://www.android.com/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![SDK](https://img.shields.io/badge/SDK-minSdk%2021%20%C2%B7%20targetSdk%2035-3DDC84)]()
+[![Permissions](https://img.shields.io/badge/Permissions-none-brightgreen)]()
+
+Android 批量 APK 重命名工具，**手机 + Android TV 双端**共用同一个状态源。100% Kotlin、
+零存储权限、零第三方解析库，无需 root —— 天然适配 Android 10~15 分区存储与 USB OTG 挂载盘。
+
+## ✨ 功能特性
+
+- **零权限 SAF 方案**：Manifest 无任何 `uses-permission`；目录授权走 `ACTION_OPEN_DOCUMENT_TREE` + `takePersistableUriPermission` 跨重启保留。
+- **双端共用状态源**：手机（Material3）与 TV（Leanback）共享 `ApkListViewModel`，扫描 / 解析 / 命名 / 重命名行为天然一致，不会出现「手机能改 TV 改不了」的分叉。
+- **规则组合命名**：应用名 / 版本号 / VersionCode / 包名 / 自定义前缀 / 日期 / 文件大小等字段按 Chip 勾选顺序拼接，分隔符可选；清洗流水线处理非法字符、保留名与 UTF-8 字节截断。
+- **批量重命名防覆盖**：大小写不敏感冲突消解（FAT/exFAT 安全），重名自动 `_1`、`_2` 递进，绝不静默覆盖。
+- **多格式零依赖解析**：`.apk` / `.apkm` / `.apks` / `.xapk` 全部原生解析，无第三方解析库；应用名正确读取资源表 `@string/app_name`，图标一并提取进双层缓存。
+- **记住 OTG 设备**：按卷 ID 记忆上次文件夹，重插同一 U 盘直达记忆子目录；目录选择器携带 `EXTRA_INITIAL_URI` 默认定位上次授权目录，不用每次翻路径。
+- **双层缓存**：`LruCache` + 磁盘 JSON，缓存 Key 含 URI + 时间戳 + 大小，文件一变即自动失效。
+- **筛选 / 搜索 / 多选 / 手动命名**：状态 chip 叠加关键词，多选只作用于可见行，手动命名走严格校验。
+- **187 例单测**：全部跑在 Robolectric 沙箱，覆盖命名、投影、SAF 授权链路与选择器取位。
 
 ---
 
