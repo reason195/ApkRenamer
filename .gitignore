@@ -1,0 +1,24 @@
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+.buildcheck/
+*.log
+tmp/
+.freebuff/
+.gradle.old*/
+*.jsh
+# 调试遗留文件
+/attr-diag.txt
+/attr2.txt
+/clean-diag.txt
+/diag2.txt
+/diag3.txt
+/native-diag.txt
+/probe2.txt
+/ps-diag.txt

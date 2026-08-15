@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    TV APK 卡片（T7 / RQ-T7-4、RQ-T7-5）
+
+    信息层级：目标名（主，28sp 粗）> 原名（次，20sp 灰）> 状态角标（18sp）。
+    卡片本身不设点击态背景色，焦点反馈全部交给 bg_tv_card.xml 的 state_focused
+    与 Presenter 里的缩放动画，避免两套反馈打架。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/tv_card_width"
+    android:layout_height="@dimen/tv_card_height"
+    android:background="@drawable/bg_tv_card"
+    android:orientation="vertical"
+    android:padding="@dimen/tv_card_padding">
+
+    <!-- 目标名：主要信息，最多两行，中部省略以保留扩展名可见 -->
+    <TextView
+        android:id="@+id/tvCardTarget"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="middle"
+        android:maxLines="2"
+        android:textColor="@color/tv_text_primary"
+        android:textSize="@dimen/tv_text_target"
+        android:textStyle="bold"
+        tools:text="微信_8.0.49_2560_com.tencent.mm.apk" />
+
+    <!-- 原名：次要信息，单行 -->
+    <TextView
+        android:id="@+id/tvCardOriginal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:ellipsize="middle"
+        android:maxLines="1"
+        android:textColor="@color/tv_text_secondary"
+        android:textSize="@dimen/tv_text_original"
+        tools:text="weixin8049android2560.apk" />
+
+    <!-- 撑开中间空隙，让底部角标行始终贴底 -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvCardStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/tv_text_secondary"
+            android:textSize="@dimen/tv_text_status"
+            tools:text="待改名" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <!-- 选中角标：RQ-T7-14，与手机端 CheckBox 同一份 selectedIds 语义 -->
+        <TextView
+            android:id="@+id/tvCardSelected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/tv_card_stroke_focused"
+            android:textSize="@dimen/tv_text_status"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:text="已选"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

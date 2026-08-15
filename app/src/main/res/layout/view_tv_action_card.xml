@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    TV 操作卡片（Row0，T7 / RQ-T7-4）
+
+    图标 + 24sp 文字，文字才是主要区分手段（Q9 把图标资产顺延 P4，
+    这里的 5 个 ic_tv_* 是手写的简单 vector，未引入任何图标库）。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/tv_action_card_width"
+    android:layout_height="@dimen/tv_action_card_height"
+    android:background="@drawable/bg_tv_card"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/tv_card_padding">
+
+    <ImageView
+        android:id="@+id/ivActionIcon"
+        android:layout_width="@dimen/tv_action_icon_size"
+        android:layout_height="@dimen/tv_action_icon_size"
+        android:contentDescription="@null"
+        tools:src="@drawable/ic_tv_folder" />
+
+    <TextView
+        android:id="@+id/tvActionTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="@color/tv_text_primary"
+        android:textSize="@dimen/tv_text_action"
+        tools:text="选择目录" />
+
+</LinearLayout>

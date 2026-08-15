@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    TV 卡片焦点态 selector（RQ-T7-5）
+
+    D-pad 焦点必须「一眼可辨」：获焦时换品牌蓝底 + 3dp 浅色描边，
+    配合 Presenter 里的 1.0f → 1.08f 缩放动画形成双重反馈。
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/tv_card_bg_focused" />
+            <stroke
+                android:width="@dimen/tv_card_stroke_width_focused"
+                android:color="@color/tv_card_stroke_focused" />
+            <corners android:radius="@dimen/tv_card_radius" />
+        </shape>
+    </item>
+
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/tv_card_bg" />
+            <stroke
+                android:width="@dimen/tv_card_stroke_width"
+                android:color="@color/tv_card_stroke" />
+            <corners android:radius="@dimen/tv_card_radius" />
+        </shape>
+    </item>
+
+</selector>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    TV 端（T7）专用文案。
+
+    > 设计偏差说明：设计文档 §5.2 的 A4 文件表未列 strings 资源，§7.9 又要求
+    > 「新增文案一律进 res/values/strings.xml，不得硬编码」。
+    > 直接改 strings.xml 会与并行进行的 A3（同样要往 strings.xml 追加 T6 文案）
+    > 产生同文件写冲突。Android 会把 res/values/ 下所有 XML 合并进同一张资源表，
+    > 拆成本文件在**编译产物上完全等价**，却让 A3 / A4 可以真正并行。
+    > 故此处新建 strings_tv.xml，语义上仍视为「strings.xml 的 T7 分区」。
+
+    与手机端语义相同的文案（选择文件夹 / 重新扫描 / 生成预览 / 执行重命名 / 取消 / 设置）
+    一律复用 strings.xml 中已有的 key，不再重复定义，避免两端叫法漂移。
+-->
+<resources>
+
+    <!-- ============ 标题区（BrowseSupportFragment.title，随 Phase 变化） ============ -->
+    <string name="tv_title_no_folder">APK 批量重命名 · 尚未选择目录</string>
+    <string name="tv_title_scanning">APK 批量重命名 · 扫描中 %1$d</string>
+    <string name="tv_title_parsing">APK 批量重命名 · 解析中 %1$d/%2$d</string>
+    <string name="tv_title_renaming">APK 批量重命名 · 重命名中 %1$d/%2$d</string>
+    <string name="tv_title_idle">APK 批量重命名 · 共 %1$d 项 · 待改名 %2$d · 已选 %3$d</string>
+
+    <!-- ============ 四个固定行的 Header（RQ-T7-3，行数恒定，空行显示 (0)） ============ -->
+    <string name="tv_row_actions">操作</string>
+    <string name="tv_row_needs_rename">待改名 (%1$d)</string>
+    <string name="tv_row_no_change">无需改动 (%1$d)</string>
+    <string name="tv_row_done_failed">已完成 / 失败 (%1$d)</string>
+
+    <!-- ============ 卡片角标 ============ -->
+    <string name="tv_badge_selected">已选</string>
+    <!-- 手动目标名角标，拼在状态角标之后（与手机端 ✎手动 一致） -->
+    <string name="tv_status_with_manual">%1$s · ✎手动</string>
+
+    <!-- ============ 操作反馈（走标题区瞬时提示，不打断焦点） ============ -->
+    <string name="tv_hint_busy">正在处理中，请稍候…</string>
+    <string name="tv_hint_no_folder">尚未选择目录，请先按「选择文件夹」</string>
+    <string name="tv_hint_no_items">当前没有可预览的文件，请先扫描目录</string>
+    <string name="tv_hint_nothing_to_rename">没有需要重命名的文件</string>
+    <!-- RQ-T7-8：SAF 降级提示。降级后仍可用已授权目录继续扫描与重命名 -->
+    <string name="tv_picker_unavailable">本设备未提供系统文件选择器，请改用手机端操作</string>
+    <!-- UiEvent.RenameFinished 的 TV 侧渲染。独立 key，避免与 A3 在 strings.xml 里的同名文案撞车 -->
+    <string name="tv_rename_finished">重命名完成 · 成功 %1$d 项，失败 %2$d 项</string>
+
+    <!-- ============ GuidedStep 二次确认（Q5 / RQ-T7-7） ============ -->
+    <string name="tv_confirm_title">确认执行重命名</string>
+    <string name="tv_confirm_desc">即将重命名 %1$d 个文件，操作不可撤销。</string>
+    <string name="tv_confirm_desc_hidden">即将重命名 %1$d 个文件，操作不可撤销。另有 %2$d 个已选文件被当前筛选隐藏，不在本次执行范围内。</string>
+    <string name="tv_confirm_ok">确认执行</string>
+
+    <!-- ============ TV 精简设置页（RQ-T7-10） ============ -->
+    <string name="tv_settings_breadcrumb">APK 批量重命名</string>
+    <string name="tv_settings_desc">修改即时保存，返回列表后按「生成预览」重算目标名。</string>
+    <string name="tv_settings_separator">分隔符</string>
+    <string name="tv_settings_separator_underscore">下划线 _</string>
+    <string name="tv_settings_separator_hyphen">连字符 -</string>
+    <string name="tv_settings_separator_dot">点号 .</string>
+    <string name="tv_settings_separator_space">空格</string>
+    <string name="tv_settings_max_byte">文件名字节上限</string>
+    <string name="tv_settings_max_byte_desc">当前 %1$d 字节 · 按 OK 每次 +10，超过 %2$d 后回到 %3$d</string>
+    <string name="tv_settings_prefix_readonly">自定义前缀（只读）</string>
+    <string name="tv_settings_prefix_empty">未设置 · 请在手机端修改</string>
+    <string name="tv_settings_prefix_value">%1$s · 请在手机端修改</string>
+    <string name="tv_settings_cache_cleared">缓存已清空</string>
+    <string name="tv_settings_done">完成</string>
+    <string name="tv_settings_on">已开启</string>
+    <string name="tv_settings_off">已关闭</string>
+
+</resources>

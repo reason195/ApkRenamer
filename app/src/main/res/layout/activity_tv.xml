@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    TV 容器（T7 / RQ-T7-2）
+
+    根容器的**初始 padding 就是 overscan 安全边距**。
+    TvActivity 会对 tv_root 调用 applySystemBarInsets(top/bottom/sides = true)，
+    该扩展函数在注册时快照初始 padding，之后每次 dispatch 都基于快照叠加系统栏 inset ——
+    所以 overscan 不会被 inset 覆盖掉，二者是**相加**关系，这正是设计文档 §4.4 的意图。
+
+    ⚠️ 这里刻意用 paddingLeft / paddingRight 而非 paddingStart / paddingEnd：
+       InsetsExt.applySystemBarInsets() 内部用的是绝对坐标的 setPadding(l, t, r, b)，
+       XML 侧保持绝对 padding 才能与之严格对齐。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tv_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/tv_bg"
+    android:paddingLeft="@dimen/tv_overscan_h"
+    android:paddingTop="@dimen/tv_overscan_v"
+    android:paddingRight="@dimen/tv_overscan_h"
+    android:paddingBottom="@dimen/tv_overscan_v"
+    tools:ignore="RtlHardcoded,RtlSymmetry">
+
+    <!-- TvBrowseFragment 的宿主容器 -->
+    <FrameLayout
+        android:id="@+id/tv_browse_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>

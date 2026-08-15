@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.ApkRenamer" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/brand</item>
+        <item name="colorPrimaryDark">@color/brand_dark</item>
+        <item name="colorSecondary">@color/brand</item>
+        <item name="colorPrimaryContainer">@color/brand_dark</item>
+        <!--
+            statusBarColor 在 API 35 上被系统忽略（状态栏强制透明），但 API 34 及以下仍然生效，
+            因此**保留不删**。API 35 上的品牌蓝顶栏由吃掉 top inset 后向上延伸的 MaterialToolbar
+            承担，视觉与 targetSdk 34 时一致。
+        -->
+        <item name="android:statusBarColor" tools:targetApi="21">@color/brand</item>
+        <!-- 顶栏是深色品牌蓝，状态栏图标保持浅色 -->
+        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <!-- 关掉系统给透明系统栏自动叠加的半透明遮罩，否则顶栏 / 底栏会发灰 -->
+        <item name="android:enforceStatusBarContrast" tools:targetApi="29">false</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
+    </style>
+
+    <style name="BadgeText">
+        <item name="android:layout_width">44dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/bg_badge</item>
+        <item name="android:textColor">@color/brand_dark</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+</resources>

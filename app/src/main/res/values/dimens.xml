@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android TV 专用尺寸（T7 / RQ-T7-2、RQ-T7-4、RQ-T7-5）
+
+    只服务 tv/ 包与三个 view_tv_* 布局，手机端布局一律不引用本文件，
+    以免误改影响 Material3 视觉（R7）。
+-->
+<resources>
+
+    <!--
+        overscan 安全边距：老式电视与部分投屏设备存在约 5% 的过扫描裁切，
+        1920×1080 下横向 5% ≈ 48dp、纵向 5% ≈ 27dp（以 1080p ≈ 960×540dp 折算）。
+        作为 activity_tv.xml 根容器的**初始 padding**，
+        applySystemBarInsets() 会在此基础上再叠加系统栏 inset（见 InsetsExt 的初始 padding 快照机制）。
+    -->
+    <dimen name="tv_overscan_h">48dp</dimen>
+    <dimen name="tv_overscan_v">27dp</dimen>
+
+    <!-- APK 卡片：1080p 下一屏约 3.5 张，留出「右侧还有更多」的视觉暗示 -->
+    <dimen name="tv_card_width">480dp</dimen>
+    <dimen name="tv_card_height">200dp</dimen>
+    <dimen name="tv_card_padding">20dp</dimen>
+    <dimen name="tv_card_radius">8dp</dimen>
+    <dimen name="tv_card_stroke_width">1dp</dimen>
+    <dimen name="tv_card_stroke_width_focused">3dp</dimen>
+
+    <!-- 操作卡片（Row0） -->
+    <dimen name="tv_action_card_width">280dp</dimen>
+    <dimen name="tv_action_card_height">160dp</dimen>
+    <dimen name="tv_action_icon_size">48dp</dimen>
+
+    <!--
+        字号（RQ-T7-4）：正文 = 目标名 28sp，已高于 PRD 要求的 24sp 基线；
+        原名与状态角标属次要信息，允许降到 20sp / 18sp。
+    -->
+    <dimen name="tv_text_target">28sp</dimen>
+    <dimen name="tv_text_original">20sp</dimen>
+    <dimen name="tv_text_status">18sp</dimen>
+    <dimen name="tv_text_action">24sp</dimen>
+
+</resources>

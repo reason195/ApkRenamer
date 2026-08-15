@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        ============================================================
+        零权限声明区（故意留空）
+        本应用全程使用 Storage Access Framework：
+          · ACTION_OPEN_DOCUMENT_TREE 由用户主动授权目录
+          · DocumentsContract.renameDocument 执行重命名
+        因此 **不需要** 以下任何权限：
+          READ_EXTERNAL_STORAGE / WRITE_EXTERNAL_STORAGE
+          MANAGE_EXTERNAL_STORAGE / READ_MEDIA_*
+        可直接兼容 Android 10 ~ 15 分区存储、TV、USB OTG 挂载盘。
+        ============================================================
+    -->
+
+    <!-- TV / 无触摸屏设备兼容 -->
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.software.leanback"
+        android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:banner="@drawable/ic_app_icon"
+        android:icon="@drawable/ic_app_icon"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ApkRenamer">
+
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <!--
+                    T7 起 MainActivity 只保留手机 / 平板入口。
+                    LEANBACK_LAUNCHER 已迁至 .tv.TvActivity —— 触屏版 UI 在 TV 上
+                    没有焦点导航，留在 TV 启动器里只会给用户一个用不了的入口。
+                -->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!--
+            Android TV 入口（T7 / RQ-T7-1）。
+
+            · exported=true：TV 启动器需要从外部拉起
+            · 仅 LEANBACK_LAUNCHER：不出现在手机的应用抽屉里
+            · theme 必须是 Theme.ApkRenamer.Leanback（parent Theme.Leanback），
+              且 TvActivity 继承 FragmentActivity 而非 AppCompatActivity
+            · 不声明 android:label，直接继承 application 的 @string/app_name
+        -->
+        <activity
+            android:name=".tv.TvActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/Theme.ApkRenamer.Leanback">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 命名规则设置页：仅由 MainActivity 内部启动，不对外暴露 -->
+        <activity
+            android:name=".SettingsActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|uiMode"
+            android:exported="false"
+            android:label="@string/settings_title" />
+    </application>
+
+</manifest>

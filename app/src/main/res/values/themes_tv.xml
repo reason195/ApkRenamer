@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Android TV 主题（T7 / RQ-T7-1）
+
+    ⚠️ Theme.Leanback 继承自 @android:style/Theme.Material，**不是** AppCompat 主题，
+       因此使用本主题的 Activity 必须继承 androidx.fragment.app.FragmentActivity，
+       用 AppCompatActivity 会在 onCreate 抛
+       IllegalStateException: You need to use a Theme.AppCompat theme。
+
+    TV 专用配色也定义在本文件里：res/values/colors.xml 是设计文档 §2.3 明文的
+    「零改动文件」（保障 R2 / R7），不能往里加 TV 的深色系配色。
+-->
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- ===== TV 深色配色（leanback 默认即深色，与手机端 Material3 浅色体系互不干扰） ===== -->
+    <color name="tv_bg">#0B1220</color>
+    <color name="tv_card_bg">#1E293B</color>
+    <color name="tv_card_bg_focused">#2563EB</color>
+    <color name="tv_card_stroke">#334155</color>
+    <color name="tv_card_stroke_focused">#DBEAFE</color>
+    <color name="tv_text_primary">#F8FAFC</color>
+    <color name="tv_text_secondary">#94A3B8</color>
+    <color name="tv_text_on_focus">#FFFFFF</color>
+
+    <!-- ===== 主题 ===== -->
+    <style name="Theme.ApkRenamer.Leanback" parent="Theme.Leanback">
+        <!-- GuidedStepSupportFragment（执行二次确认 / TV 设置页）走下面这个子主题 -->
+        <item name="guidedStepTheme">@style/Theme.ApkRenamer.Leanback.GuidedStep</item>
+        <item name="android:windowBackground">@color/tv_bg</item>
+        <item name="android:colorPrimary" tools:targetApi="21">@color/brand</item>
+        <!--
+            TV 上同样走 edge-to-edge（TvActivity 调 enableEdgeToEdgeCompat），
+            让三端渲染路径一致；overscan + 系统栏 inset 由根容器 padding 承担。
+        -->
+        <item name="android:statusBarColor" tools:targetApi="21">@android:color/transparent</item>
+        <item name="android:navigationBarColor" tools:targetApi="21">@android:color/transparent</item>
+    </style>
+
+    <!--
+        GuidedStep 子主题：保持 leanback 默认外观即可，仅作为 guidedStepTheme 的指向目标存在。
+        这里刻意不覆写 guidance/actions 的动画与 selector 属性——
+        leanback 1.0.0 的这批属性名在不同版本间有过调整，覆写收益极小而编译期风险不小。
+    -->
+    <style name="Theme.ApkRenamer.Leanback.GuidedStep" parent="Theme.Leanback.GuidedStep" />
+
+</resources>

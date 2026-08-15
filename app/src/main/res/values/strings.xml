@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">APK 批量重命名</string>
+
+    <string name="pick_folder">选择文件夹</string>
+    <string name="rescan">重新扫描</string>
+    <string name="no_folder">尚未授权任何目录</string>
+    <string name="recursive">包含子目录</string>
+    <string name="version_prefix_v">版本号前加 v</string>
+    <string name="custom_prefix_hint">自定义前缀</string>
+    <string name="preview">生成预览</string>
+    <string name="execute">执行重命名</string>
+    <string name="cancel">取消</string>
+    <string name="fields_title">命名字段（点击顺序即拼接顺序）</string>
+    <string name="separator_title">分隔符</string>
+    <string name="idle_hint">授权一个目录后即可开始扫描，全程无需存储权限。</string>
+    <string name="clear_cache">清空缓存</string>
+
+    <!-- 设置页 -->
+    <string name="settings_title">设置</string>
+    <string name="settings_desc">命名规则的修改会即时保存到本地，返回主页后立即生效。</string>
+    <string name="rule_group_title">命名规则</string>
+    <string name="preview_group_title">预览</string>
+    <string name="template_preview">预览模板：%1$s</string>
+
+    <!-- 高级命名选项：对应 NameComposer.Rule 的 6 个进阶参数 -->
+    <string name="advanced_title">高级选项</string>
+    <string name="wrap_version_code">VersionCode 加括号</string>
+    <string name="illegal_replacement_hint">非法字符替换（留空 = 删除）</string>
+    <string name="max_byte_length_hint">文件名字节上限（20–255，默认 200）</string>
+    <string name="collapse_separator">折叠重复分隔符</string>
+    <string name="trim_spaces">裁剪多余空格</string>
+    <string name="lowercase_extension">扩展名小写</string>
+
+    <!-- 主界面 A3：筛选 / 选择 / 手动改名 -->
+    <string name="app_icon_desc">应用图标</string>
+    <string name="manual_badge">手动</string>
+    <string name="select_all">全选</string>
+    <string name="deselect_all">取消全选</string>
+    <string name="select_all_visible">全选可见</string>
+    <string name="clear_visible">仅清可见</string>
+    <string name="clear_all">清空全部选择</string>
+    <string name="selection_summary">已选 %1$d · 可执行 %2$d</string>
+    <string name="picker_unavailable">当前设备不支持选择文件夹，请检查系统文件管理器</string>
+
+    <!-- OTG / 可移动卷记忆 -->
+    <string name="otg_restore_title">恢复上次的文件夹</string>
+    <string name="otg_restore_msg">上次在这个 U 盘打开的是「%1$s」，是否恢复它？</string>
+    <string name="otg_restore">恢复</string>
+    <string name="otg_use_current">就用当前文件夹</string>
+    <string name="confirm_rename_title">确认重命名</string>
+    <string name="manual_rename_title">手动改名</string>
+    <string name="manual_rename_hint">输入新文件名（扩展名留空则沿用 %1$s）</string>
+    <string name="manual_rename_ok">应用</string>
+    <string name="manual_rename_clear">撤销手动名</string>
+</resources>
