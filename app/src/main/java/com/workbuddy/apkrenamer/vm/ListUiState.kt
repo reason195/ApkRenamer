@@ -184,7 +184,7 @@ data class ListUiState(
     val phase: Phase = Phase.IDLE,
     val progress: Int = 0,
     val progressMax: Int = 0,
-    val statusText: String = "",
+    val statusText: UiText = UiText.Raw(""),
     val counts: Counts = Counts(),
     val totalCount: Int = 0,
     val selectedCount: Int = 0,
@@ -223,7 +223,7 @@ data class ListUiState(
 sealed class UiEvent {
 
     /** 通用短提示 */
-    data class Toast(val text: String) : UiEvent()
+    data class Toast(val text: UiText) : UiEvent()
 
     /** 批量重命名收尾，携带成功 / 失败数 */
     data class RenameFinished(val success: Int, val failed: Int) : UiEvent()

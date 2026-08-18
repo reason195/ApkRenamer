@@ -26,6 +26,7 @@ import com.workbuddy.apkrenamer.vm.ListUiState
 import com.workbuddy.apkrenamer.vm.Phase
 import com.workbuddy.apkrenamer.vm.RowStatus
 import com.workbuddy.apkrenamer.vm.UiEvent
+import com.workbuddy.apkrenamer.ui.resolve
 import kotlinx.coroutines.launch
 
 /** 瞬时提示占用标题区的时长；到点后自动还原为状态标题 */
@@ -395,7 +396,7 @@ class TvBrowseFragment : BrowseSupportFragment() {
     private fun onEvent(event: UiEvent) {
         when (event) {
             is UiEvent.Toast ->
-                Toast.makeText(requireContext(), event.text, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), event.text.resolve(requireContext()), Toast.LENGTH_SHORT).show()
 
             is UiEvent.RenameFinished ->
                 Toast.makeText(

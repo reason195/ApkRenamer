@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.workbuddy.apkrenamer.R
 import com.workbuddy.apkrenamer.cache.ApkMetadataCache
 import com.workbuddy.apkrenamer.core.MetaExtractor
 import com.workbuddy.apkrenamer.core.NameComposer
@@ -65,6 +66,8 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
 
     private val cache: ApkMetadataCache = ApkMetadataCache.getInstance(appContext)
 
+    private fun text(resId: Int, vararg args: Any): UiText = UiText.Resource(resId, args.toList())
+
     /* ---------------- 唯一真源 ---------------- */
 
     /** 授权目录（字符串形式，与 [ListUiState.treeUri] 一致） */
@@ -99,7 +102,7 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
     private var phase: Phase = Phase.IDLE
     private var progress: Int = 0
     private var progressMax: Int = 0
-    private var statusText: String = ""
+    private var statusText: UiText = UiText.Raw("")
 
     /** 当前在跑的扫描 / 重命名任务，新任务发起前先取消旧的 */
     private var runningJob: Job? = null
@@ -146,7 +149,7 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
         // 用「覆盖判断」而非精确相等：记忆的 OTG 子目录由父级树授权覆盖，重启后依然可用
         if (SafScanner.isCoveredByPersistedGrant(appContext, uri)) {
             treeUri = saved
-            statusText = "已恢复上次目录，点击「重新扫描」开始"
+            statusText = text(R.string.status_restored_folder)
         } else {
             // 授权已被系统回收（重装 / 清数据 / 用户手动撤销 / U 盘拔出），清掉脏记录避免反复失败
             prefs.edit().remove(RulePrefs.KEY_TREE).apply()
@@ -182,7 +185,7 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
         items = emptyList()
         selectedIds.clear()
         manualTargets.clear()
-        statusText = "已授权目录，开始扫描…"
+        statusText = text(R.string.status_authorized_scanning)
         publish()
 
         scan()
@@ -259,38 +262,38 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun scan() {
         val tree = treeUri?.let { runCatching { Uri.parse(it) }.getOrNull() } ?: run {
-            emitToast("请先选择一个文件夹")
+            emitToast(text(R.string.toast_select_folder))
             return
         }
         runningJob?.cancel()
         runningJob = viewModelScope.launch {
-            setPhase(Phase.SCANNING, 0, 0, "正在扫描目录…")
+            setPhase(Phase.SCANNING, 0, 0, text(R.string.status_scanning_folder))
             cache.resetStats()
             try {
                 val found = SafScanner.scan(
                     context = appContext,
                     treeUri = tree,
                     recursive = RulePrefs.loadRecursive(prefs)
-                ) { count -> setPhase(Phase.SCANNING, count, 0, "正在扫描…已发现 $count 个安装包") }
+                ) { count -> setPhase(Phase.SCANNING, count, 0, text(R.string.status_scanning_found, count)) }
 
                 if (found.isEmpty()) {
                     items = emptyList()
                     selectedIds.clear()
                     manualTargets.clear()
-                    setPhase(Phase.IDLE, 0, 0, "该目录下没有 apk / apkm / apks / xapk 文件")
+                    setPhase(Phase.IDLE, 0, 0, text(R.string.status_no_archives))
                     return@launch
                 }
 
                 items = found
                 pruneStaleState()
-                setPhase(Phase.PARSING, 0, found.size, "正在解析元数据…")
+                setPhase(Phase.PARSING, 0, found.size, text(R.string.status_parsing_metadata))
 
                 val t0 = System.currentTimeMillis()
                 val parsed = MetaExtractor.extractAll(
                     context = appContext,
                     items = found
                 ) { p ->
-                    setPhase(Phase.PARSING, p.done, p.total, "解析中 ${p.done}/${p.total} · ${p.currentName}")
+                    setPhase(Phase.PARSING, p.done, p.total, text(R.string.status_parsing_progress, p.done, p.total, p.currentName))
                 }
                 val cost = System.currentTimeMillis() - t0
 
@@ -301,14 +304,13 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
                 val s = cache.stats()
                 setPhase(
                     Phase.IDLE, 0, 0,
-                    "解析完成 ${parsed.size} 个 · 耗时 ${cost}ms · " +
-                        "缓存命中 ${s.hitRate}%（内存 ${s.memoryHits} / 磁盘 ${s.diskHits} / 新解析 ${s.misses}）"
+                    text(R.string.status_parsing_complete, parsed.size, cost, s.hitRate, s.memoryHits, s.diskHits, s.misses)
                 )
             } catch (ce: CancellationException) {
                 // 必须原样上抛：吞掉会截断取消传播，viewModelScope 无法正常收敛
                 throw ce
             } catch (t: Throwable) {
-                setPhase(Phase.IDLE, 0, 0, "扫描失败：${t.message}")
+                setPhase(Phase.IDLE, 0, 0, text(R.string.status_scan_failed, t.message ?: t.javaClass.simpleName))
             } finally {
                 // 无论正常结束、异常还是被取消，都要退出忙态，否则按钮永久置灰
                 if (phase != Phase.IDLE) setPhase(Phase.IDLE, 0, 0, statusText)
@@ -336,17 +338,17 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
      */
     fun applyRule(autoSelect: Boolean, showToast: Boolean) {
         if (items.isEmpty()) {
-            if (showToast) emitToast("请先扫描目录")
+            if (showToast) emitToast(text(R.string.toast_scan_folder))
             return
         }
         val rule = currentRule()
         if (rule.fields.isEmpty()) {
-            emitToast("请至少选择一个命名字段")
+            emitToast(text(R.string.toast_select_name_field))
             return
         }
         val pending = applyRuleInternal(autoSelect)
         if (showToast) {
-            emitToast(if (pending == 0) "没有需要改名的文件" else "已生成 $pending 条改名预览")
+            emitToast(if (pending == 0) text(R.string.toast_nothing_to_rename) else text(R.string.toast_preview_generated, pending))
         }
     }
 
@@ -411,7 +413,7 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
         }
 
         val pending = items.count { it.needsRename }
-        statusText = "待重命名 $pending / ${items.size} 个文件"
+        statusText = text(R.string.status_pending_rename, pending, items.size)
         publish()
         return pending
     }
@@ -556,13 +558,13 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
             .map { it.item }
 
         if (targets.isEmpty()) {
-            emitToast("没有需要重命名的文件，请先生成预览")
+            emitToast(text(R.string.toast_generate_preview_first))
             return
         }
 
         runningJob?.cancel()
         runningJob = viewModelScope.launch {
-            setPhase(Phase.RENAMING, 0, targets.size, "准备重命名…")
+            setPhase(Phase.RENAMING, 0, targets.size, text(R.string.status_renaming_prepare))
             var success = 0
             var failed = 0
 
@@ -604,7 +606,7 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
                             failed++
                             item.copy(
                                 state = ItemState.FAILED,
-                                detail = e.message ?: "重命名失败"
+                                detail = e.message ?: appContext.getString(R.string.row_status_failed)
                             )
                         }
                     )
@@ -615,19 +617,19 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
                         items = working.toList()
                         setPhase(
                             Phase.RENAMING, index + 1, targets.size,
-                            "重命名中 ${index + 1}/${targets.size} · 成功 $success 失败 $failed"
+                            text(R.string.status_renaming_progress, index + 1, targets.size, success, failed)
                         )
                     }
                 }
 
                 items = working.toList()
                 cache.flush()
-                setPhase(Phase.IDLE, 0, 0, "重命名完成：成功 $success，失败 $failed")
+                setPhase(Phase.IDLE, 0, 0, text(R.string.status_renaming_complete, success, failed))
                 _events.emit(UiEvent.RenameFinished(success, failed))
             } catch (ce: CancellationException) {
                 throw ce
             } catch (t: Throwable) {
-                setPhase(Phase.IDLE, 0, 0, "重命名中断：${t.message}")
+                setPhase(Phase.IDLE, 0, 0, text(R.string.status_renaming_interrupted, t.message ?: t.javaClass.simpleName))
             } finally {
                 // 取消 / 中断也要把已落地的那部分重命名同步进列表，再退出忙态
                 items = working.toList()
@@ -646,9 +648,9 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
             // 图标文件已全部删除：作废路径 memo 并递增纪元，强迫下一次投影重查
             iconPathMemo.clear()
             iconEpoch++
-            statusText = "缓存已清空，下次扫描将重新解析"
+            statusText = text(R.string.status_cache_cleared)
             publish()
-            _events.emit(UiEvent.Toast("缓存已清空"))
+            _events.emit(UiEvent.Toast(text(R.string.status_cache_cleared)))
         }
     }
 
@@ -664,7 +666,7 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
     private fun currentRows(): List<ApkRow> =
         ListProjection.buildRows(items, selectedIds, manualTargets.keys)
 
-    private fun setPhase(next: Phase, progressValue: Int, maxValue: Int, status: String) {
+    private fun setPhase(next: Phase, progressValue: Int, maxValue: Int, status: UiText) {
         phase = next
         progress = progressValue
         progressMax = maxValue
@@ -763,7 +765,7 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
         ).also { projectionSnapshot = it }
     }
 
-    private fun emitToast(text: String) {
+    private fun emitToast(text: UiText) {
         _events.tryEmit(UiEvent.Toast(text))
     }
 }

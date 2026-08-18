@@ -82,15 +82,15 @@ class ApkAdapter(
             } else if (meta?.error != null) {
                 append(meta.error)
             } else {
-                append("待解析")
+                append(ctx.getString(R.string.metadata_pending))
             }
             append(" · ").append(item.readableSize())
-            if (meta?.fromCache == true) append(" · 缓存命中")
+            if (meta?.fromCache == true) append(" · ").append(ctx.getString(R.string.metadata_cache_hit))
             if (item.relativePath.isNotEmpty()) append(" · /").append(item.relativePath)
         }
 
-        val (text, colorRes, bgRes) = stateStyle(row.status)
-        b.tvState.text = text
+        val (colorRes, bgRes) = stateStyle(row.status)
+        b.tvState.text = row.status.localizedLabel(ctx)
         b.tvState.setTextColor(ContextCompat.getColor(ctx, colorRes))
         b.tvState.backgroundTintList =
             ColorStateList.valueOf(ContextCompat.getColor(ctx, bgRes))
@@ -104,12 +104,12 @@ class ApkAdapter(
      * 展示状态 → （文案，胶囊文字色，胶囊底色）。优先使用 [RowStatus.label] 保持两端一致。
      * 文字色与底色配对定义于 colors.xml（* 与 *_bg 成对，日/夜各自可读）。
      */
-    private fun stateStyle(status: RowStatus): Triple<String, Int, Int> = when (status) {
-        RowStatus.PENDING -> Triple("待解析", R.color.text_secondary, R.color.neutral_bg)
-        RowStatus.NEEDS_RENAME -> Triple("待改名", R.color.warning, R.color.warning_bg)
-        RowStatus.NO_CHANGE -> Triple("无需改", R.color.text_secondary, R.color.neutral_bg)
-        RowStatus.DONE -> Triple("已完成", R.color.success, R.color.success_bg)
-        RowStatus.FAILED -> Triple("失败", R.color.danger, R.color.danger_bg)
+    private fun stateStyle(status: RowStatus): Pair<Int, Int> = when (status) {
+        RowStatus.PENDING -> R.color.text_secondary to R.color.neutral_bg
+        RowStatus.NEEDS_RENAME -> R.color.warning to R.color.warning_bg
+        RowStatus.NO_CHANGE -> R.color.text_secondary to R.color.neutral_bg
+        RowStatus.DONE -> R.color.success to R.color.success_bg
+        RowStatus.FAILED -> R.color.danger to R.color.danger_bg
     }
 
     companion object {

@@ -2,7 +2,11 @@ package com.workbuddy.apkrenamer
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.chip.Chip
 import com.workbuddy.apkrenamer.core.NameComposer
@@ -10,6 +14,7 @@ import com.workbuddy.apkrenamer.core.RulePrefs
 import com.workbuddy.apkrenamer.databinding.ActivitySettingsBinding
 import com.workbuddy.apkrenamer.ui.applySystemBarInsets
 import com.workbuddy.apkrenamer.ui.enableEdgeToEdgeCompat
+import com.workbuddy.apkrenamer.ui.localizedLabel
 
 /**
  * 设置页：命名规则 + 高级选项 + 模板预览。
@@ -54,6 +59,35 @@ class SettingsActivity : AppCompatActivity() {
         renderTemplate()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.settings_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.action_app_language -> { showLanguagePicker(); true }
+        else -> super.onOptionsItemSelected(item)
+    }
+
+    private fun showLanguagePicker() {
+        val tags = listOf("", "zh-CN", "en")
+        val current = AppCompatDelegate.getApplicationLocales().toLanguageTags()
+        val checked = tags.indexOf(current).takeIf { it >= 0 } ?: 0
+        val labels = arrayOf(
+            getString(R.string.app_language_system_default),
+            getString(R.string.app_language_simplified_chinese),
+            getString(R.string.app_language_english)
+        )
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.app_language_choose)
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tags[which]))
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
@@ -77,7 +111,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.chipFields.removeAllViews()
         NameComposer.Field.values().forEach { field ->
             val chip = newChip(binding.chipFields).apply {
-                text = field.label
+                text = field.localizedLabel(this@SettingsActivity)
                 isChecked = field in selectedFields
                 tag = field
             }
@@ -92,9 +126,9 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun buildSeparatorChips() {
         binding.chipSeparators.removeAllViews()
-        SEPARATORS.forEach { (value, label) ->
+        SEPARATORS.forEach { (value, labelRes) ->
             val chip = newChip(binding.chipSeparators).apply {
-                text = label
+                text = getString(labelRes)
                 isChecked = value == separator
                 tag = value
             }
@@ -189,11 +223,11 @@ class SettingsActivity : AppCompatActivity() {
         const val PREFS = "apk_renamer_prefs"
 
         val SEPARATORS = listOf(
-            "_" to "下划线 _",
-            "-" to "连字符 -",
-            " " to "空格",
-            "." to "点 .",
-            "" to "无"
+            "_" to R.string.separator_underscore,
+            "-" to R.string.separator_hyphen,
+            " " to R.string.separator_space,
+            "." to R.string.separator_dot,
+            "" to R.string.separator_none
         )
     }
 }

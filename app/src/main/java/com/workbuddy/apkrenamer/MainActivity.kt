@@ -18,6 +18,8 @@ import com.workbuddy.apkrenamer.databinding.ActivityMainBinding
 import com.workbuddy.apkrenamer.ui.ApkAdapter
 import com.workbuddy.apkrenamer.ui.applySystemBarInsets
 import com.workbuddy.apkrenamer.ui.enableEdgeToEdgeCompat
+import com.workbuddy.apkrenamer.ui.localizedLabel
+import com.workbuddy.apkrenamer.ui.resolve
 import com.workbuddy.apkrenamer.ui.showTargetNameEditor
 import com.workbuddy.apkrenamer.core.SafScanner
 import com.workbuddy.apkrenamer.vm.ApkListViewModel
@@ -150,7 +152,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupChips() {
         for (filter in StatusFilter.values()) {
             val chip = Chip(this).apply {
-                text = filter.label
+                text = filter.localizedLabel(this@MainActivity)
                 isCheckable = true
                 setOnCheckedChangeListener { _, checked ->
                     if (checked) vm.setFilter(filter)
@@ -202,11 +204,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun render(state: ListUiState) {
         binding.tvFolder.text = if (state.hasFolder) {
-            "已授权：${Uri.decode(state.treeUri)}"
+            getString(R.string.status_folder_authorized, Uri.decode(state.treeUri))
         } else {
             getString(R.string.no_folder)
         }
-        binding.tvStatus.text = state.statusText
+        binding.tvStatus.text = state.statusText.resolve(this)
         // ListAdapter 内部做 DiffUtil，绝不使用 notifyDataSetChanged()
         adapter.submitList(state.rows)
         updateProgress(state)
@@ -237,14 +239,14 @@ class MainActivity : AppCompatActivity() {
     private fun updateChips(state: ListUiState) {
         chipViews.forEach { (filter, chip) ->
             val count = state.counts.of(filter, state.selectedCount)
-            chip.text = "${filter.label} $count"
+            chip.text = getString(R.string.filter_count, filter.localizedLabel(this), count)
         }
     }
 
     private fun onEvent(event: UiEvent) {
         when (event) {
-            is UiEvent.Toast -> toast(event.text)
-            is UiEvent.RenameFinished -> toast("完成：成功 ${event.success}，失败 ${event.failed}")
+            is UiEvent.Toast -> toast(event.text.resolve(this))
+            is UiEvent.RenameFinished -> toast(getString(R.string.toast_rename_finished, event.success, event.failed))
             is UiEvent.PickerUnavailable -> toast(getString(R.string.picker_unavailable))
         }
     }
@@ -258,15 +260,14 @@ class MainActivity : AppCompatActivity() {
         // 执行范围与 ViewModel.renameSelected() 一致：筛选后 ∧ 可执行
         val exec = ListProjection.executableRows(ListProjection.applyFilter(state.rows, state.filter))
         if (exec.isEmpty()) {
-            toast("没有需要重命名的文件（都已无需改动或未解析）")
+            toast(getString(R.string.toast_no_executable_files))
             return
         }
         val first = exec.first()
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.confirm_rename_title)
             .setMessage(
-                "将对 ${exec.size} 个文件执行重命名，操作不可撤销。\n\n示例：\n" +
-                    "${first.item.displayName}\n→ ${first.item.targetName}"
+                getString(R.string.confirm_rename_message, exec.size, first.item.displayName, first.item.targetName)
             )
             .setNegativeButton(R.string.cancel, null)
             .setPositiveButton(R.string.execute) { _, _ -> vm.renameSelected() }

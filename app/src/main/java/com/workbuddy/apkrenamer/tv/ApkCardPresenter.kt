@@ -9,6 +9,7 @@ import androidx.leanback.widget.DiffCallback
 import androidx.leanback.widget.Presenter
 import com.workbuddy.apkrenamer.R
 import com.workbuddy.apkrenamer.vm.ApkRow
+import com.workbuddy.apkrenamer.ui.localizedLabel
 
 /**
  * Row1 / Row2 / Row3 共用的 diff 规则。
@@ -71,7 +72,7 @@ class ApkCardPresenter : Presenter() {
         holder.target.text = row.item.targetName ?: row.item.displayName
         holder.original.text = row.item.displayName
 
-        val statusLabel = row.status.label
+        val statusLabel = row.status.localizedLabel(ctx)
         holder.status.text = if (row.manual) {
             ctx.getString(R.string.tv_status_with_manual, statusLabel)
         } else {

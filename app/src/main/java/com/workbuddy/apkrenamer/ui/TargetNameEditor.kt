@@ -40,7 +40,7 @@ fun showTargetNameEditor(context: Context, vm: ApkListViewModel, id: String) {
     /** 重新校验当前输入并刷新错误文案 + 按钮可用性 */
     fun refresh(input: String) {
         val v = vm.validateManualName(id, input)
-        binding.tvError.text = v.message ?: ""
+        binding.tvError.text = v.localizedMessage(context).orEmpty()
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = v.isValid
     }
 
@@ -56,7 +56,7 @@ fun showTargetNameEditor(context: Context, vm: ApkListViewModel, id: String) {
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
             val result = vm.setManualTarget(id, binding.etName.text.toString())
             if (result.isValid) dialog.dismiss()
-            else binding.tvError.text = result.message ?: ""
+            else binding.tvError.text = result.localizedMessage(context).orEmpty()
         }
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener {
             vm.clearManualTarget(id)
