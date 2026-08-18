@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/reason195/ApkRenamer/actions/workflows/ci.yml/badge.svg)](https://github.com/reason195/ApkRenamer/actions/workflows/ci.yml)
 [![Android](https://img.shields.io/badge/Android-Platform-3DDC84?logo=android&logoColor=white)](https://www.android.com/)
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.4.10-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![SDK](https://img.shields.io/badge/SDK-minSdk%2021%20%C2%B7%20targetSdk%2035-3DDC84)]()
 [![Permissions](https://img.shields.io/badge/Permissions-none-brightgreen)]()
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue)](LICENSE)
@@ -76,7 +76,8 @@ withContext(Dispatchers.IO) {
 
 - **`Semaphore` 限流**：并发度 = `CPU 核心数 ∈ [2, 8]`。解压 base.apk 会产生数十 MB 的临时 I/O，
   无限并发只会抢占带宽并推高 OOM 风险。
-- **进度节流**：50 ms 一次切回 `Dispatchers.Main` 回调，缓存全命中时上千文件也不会刷爆主线程。
+- **进度节流**：50 ms 一次切回 `Dispatchers.Main` 回调；状态快照对「仅进度数字变化」的 tick
+  复用上一次投影结果（排序 / 重复包 / 计数 / 图标路径不重算），缓存全命中时上千文件也不会刷爆主线程。
 - **可取消**：`lifecycleScope` + `ensureActive()`，退出页面即中断，无泄漏。
 
 ---
@@ -101,6 +102,8 @@ get(key)
 - 落盘为**原子写**（先写 `.tmp` 再 rename），进程被杀不会留下截断的 JSON。
 - 解析**失败的结果不入缓存**，避免一次偶发 I/O 错误被永久固化。
 - 重命名成功后会把元数据**挂到新 URI 的 Key** 上，否则改完名下次扫描会全部重新解压。
+- 磁盘层 LRU 淘汰时**同步清理对应图标 PNG**；缓存整体作废（结构升级 / JSON 损坏）时图标
+  目录一并重建，`apk_icons` 的占用不会只增不减。
 
 ---
 
@@ -258,7 +261,9 @@ ApkItem 原始集合
 ./gradlew :app:testDebugUnitTest   # 全部单测（含 Robolectric）
 ```
 
-- compileSdk 35 / targetSdk 35 / minSdk 21 / JDK 17 / Kotlin 1.9.24 / AGP 8.5.2 / Gradle 8.7
+- compileSdk 35 / targetSdk 35 / minSdk 21 / JDK 21 / Kotlin 2.4.10（K2，由 AGP 9 内置）/ AGP 9.3.1 / Gradle 9.7；
+  AGP 9 起 Kotlin 支持内置，模块不再 `apply` `org.jetbrains.kotlin.android`（仅保留在 classpath
+  上指定编译器版本，见根 `build.gradle.kts` 注释）
 - 仅依赖 AndroidX + Material + kotlinx-coroutines + `androidx.leanback`，无解析类第三方库；
   测试仅额外引入 `org.robolectric:robolectric:4.14.1`（`testImplementation`）。
   `androidx.leanback:leanback:1.0.0` 自身 `minSdk 17`，低于本项目的 21，**不会抬高最低版本要求**；

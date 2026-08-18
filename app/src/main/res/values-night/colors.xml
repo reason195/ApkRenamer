@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    深色模式（DayNight）覆盖。
+
+    - brand_deep（填充按钮）日/夜同色：深青按钮在深色底上依然可辨，
+      白色文字对比 5.5:1，无需覆盖。
+    - 语义状态文字换为深底可读的浅色，胶囊底换为同色系深容器。
+    - toolbar_bg 为深青：状态栏图标保持浅色（windowLightStatusBar 仍为 false）。
+-->
+<resources>
+    <!-- 品牌 -->
+    <color name="brand">#2DD4BF</color>
+    <color name="brand_container">#0F3D38</color>
+    <color name="brand_oncontainer">#5EEAD4</color>
+    <color name="toolbar_bg">#0F3A35</color>
+
+    <!-- 执行 CTA：夜间提亮一档，黑字对比 7.5:1 -->
+    <color name="accent">#F97316</color>
+
+    <!-- 语义状态 -->
+    <color name="success">#34D399</color>
+    <color name="warning">#FBBF24</color>
+    <color name="danger">#FCA5A5</color>
+    <color name="success_bg">#064E3B</color>
+    <color name="warning_bg">#422006</color>
+    <color name="danger_bg">#450A0A</color>
+    <color name="neutral_bg">#1C3630</color>
+
+    <!-- 文本与表面 -->
+    <color name="text_primary">#E2E8F0</color>
+    <color name="text_secondary">#94A3B8</color>
+    <color name="bg_window">#0C1A17</color>
+    <color name="surface_card">#122522</color>
+    <color name="surface_muted">#1C3630</color>
+    <color name="divider">#274841</color>
+</resources>

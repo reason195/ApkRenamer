@@ -10,7 +10,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/brand"
+        android:background="@color/toolbar_bg"
         android:minHeight="?attr/actionBarSize"
         app:navigationIconTint="#FFFFFF"
         app:title="@string/settings_title"
@@ -29,14 +29,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="10dp">
+            android:paddingBottom="12dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="14dp"
-                android:paddingTop="12dp"
-                android:paddingEnd="14dp"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="4dp"
                 android:text="@string/settings_desc"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
@@ -46,28 +46,31 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="1dp">
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="6dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/rule_group_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="12sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:text="@string/fields_title"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
@@ -76,14 +79,14 @@
                         android:id="@+id/chipFields"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         app:chipSpacingVertical="0dp"
                         app:singleSelection="false" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:text="@string/separator_title"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
@@ -92,7 +95,7 @@
                         android:id="@+id/chipSeparators"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         app:selectionRequired="true"
                         app:singleSelection="true" />
 
@@ -100,7 +103,7 @@
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:hint="@string/custom_prefix_hint">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -116,7 +119,7 @@
                         android:id="@+id/swVersionV"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:checked="true"
                         android:text="@string/version_prefix_v"
                         android:textSize="13sp" />
@@ -125,7 +128,7 @@
                         android:id="@+id/swRecursive"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:checked="true"
                         android:text="@string/recursive"
                         android:textSize="13sp" />
@@ -137,30 +140,32 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="10dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="1dp">
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="6dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/advanced_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="12sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:hint="@string/illegal_replacement_hint">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -176,7 +181,7 @@
                         style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:hint="@string/max_byte_length_hint">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -193,7 +198,7 @@
                         android:id="@+id/swWrapVersionCode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:text="@string/wrap_version_code"
                         android:textSize="13sp" />
 
@@ -201,7 +206,7 @@
                         android:id="@+id/swCollapseSeparator"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:checked="true"
                         android:text="@string/collapse_separator"
                         android:textSize="13sp" />
@@ -210,7 +215,7 @@
                         android:id="@+id/swTrimSpaces"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:checked="true"
                         android:text="@string/trim_spaces"
                         android:textSize="13sp" />
@@ -219,7 +224,7 @@
                         android:id="@+id/swLowercaseExt"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:checked="true"
                         android:text="@string/lowercase_extension"
                         android:textSize="13sp" />
@@ -231,32 +236,35 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                app:cardCornerRadius="14dp"
-                app:cardElevation="1dp">
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginVertical="6dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp">
+                    android:padding="14dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/preview_group_title"
                         android:textColor="@color/text_primary"
-                        android:textSize="12sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/tvTemplate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:background="@color/surface_muted"
-                        android:padding="8dp"
-                        android:textColor="@color/brand_dark"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_template"
+                        android:padding="10dp"
+                        android:textColor="@color/brand_oncontainer"
                         android:textSize="12sp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

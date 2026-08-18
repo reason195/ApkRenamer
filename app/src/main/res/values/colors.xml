@@ -1,13 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Flat Design 青绿配色（ui-ux-pro-max 设计系统输出，2026-08 重设计）。
+
+    令牌语义：
+    - brand            品牌识别色（工具栏、启动图标、chip 选中态），白色文字仅用于大字号/图标
+    - brand_deep       可交互控件主色（填充按钮等），保证白色文字 4.5:1 对比度
+    - brand_container  品牌浅底容器（徽章底、模板预览底）
+    - brand_oncontainer 品牌容器上的文字色
+    - accent / on_accent 执行类 CTA（Flat Design 橙 + 深色文字）
+    - *_bg             列表状态胶囊的底色，与同名状态文字色配对使用
+    深色模式覆盖见 values-night/colors.xml；TV 专用配色在 themes_tv.xml，勿混入本文件。
+-->
 <resources>
-    <color name="brand">#2563EB</color>
-    <color name="brand_dark">#1D4ED8</color>
-    <color name="brand_light">#B3D4FC</color>
-    <color name="success">#16A34A</color>
-    <color name="danger">#DC2626</color>
-    <color name="warning">#D97706</color>
-    <color name="text_primary">#0F172A</color>
-    <color name="text_secondary">#64748B</color>
-    <color name="surface_muted">#F1F5F9</color>
-    <color name="ic_launcher_background">#2563EB</color>
+    <!-- 品牌 -->
+    <color name="brand">#0D9488</color>
+    <color name="brand_deep">#0F766E</color>
+    <color name="brand_container">#CCFBF1</color>
+    <color name="brand_oncontainer">#0F766E</color>
+    <color name="toolbar_bg">@color/brand</color>
+
+    <!-- 执行 CTA -->
+    <color name="accent">#EA580C</color>
+    <color name="on_accent">#000000</color>
+
+    <!-- 语义状态（文字色 / 胶囊底色配对） -->
+    <color name="success">#047857</color>
+    <color name="warning">#B45309</color>
+    <color name="danger">#B91C1C</color>
+    <color name="success_bg">#D1FAE5</color>
+    <color name="warning_bg">#FEF3C7</color>
+    <color name="danger_bg">#FEE2E2</color>
+    <color name="neutral_bg">#E8F1F4</color>
+
+    <!-- 文本与表面 -->
+    <color name="text_primary">#134E4A</color>
+    <color name="text_secondary">#475569</color>
+    <color name="bg_window">#F0FDFA</color>
+    <color name="surface_card">#FFFFFF</color>
+    <color name="surface_muted">#E8F1F4</color>
+    <color name="divider">#99F6E4</color>
+
+    <!-- 启动图标背景与自适应图标同步 -->
+    <color name="ic_launcher_background">#0D9488</color>
 </resources>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- APK 图标占位底：12dp 圆角与 48dp 图标框配合，夜间自动换深色 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
+    <corners android:radius="12dp" />
     <solid android:color="@color/surface_muted" />
-    <corners android:radius="8dp" />
 </shape>

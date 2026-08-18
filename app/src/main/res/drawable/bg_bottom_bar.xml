@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    底部操作条背景（Flat Design：用 1dp 顶部分隔线替代投影）。
+    实现方式：整块先铺 divider 色，再用 surface_card 盖住除顶部 1dp 外的
+    全部区域——layer-list 的 android:height 需要 API 23，minSdk 21 用不了。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/divider" />
+        </shape>
+    </item>
+    <item android:top="1dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/surface_card" />
+        </shape>
+    </item>
+</layer-list>

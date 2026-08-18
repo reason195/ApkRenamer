@@ -260,7 +260,8 @@ object MetaExtractor {
             pm.getPackageArchiveInfo(archivePath, 0)
         }.getOrNull() ?: return null
 
-        val pkg = info.packageName ?: return null
+        // compileSdk 35 起 packageName 已标注为非空
+        val pkg = info.packageName
 
         val appInfo = info.applicationInfo
         var label = ""

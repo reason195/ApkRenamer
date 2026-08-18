@@ -169,6 +169,21 @@ class ApkMetadataCache private constructor(context: Context) {
         }
     }
 
+    /**
+     * 删除不再被磁盘索引引用的图标 PNG。
+     *
+     * 图标与元数据同 Key：元数据条目被 LRU 淘汰后，对应的 `<key>.png` 就成了
+     * 谁也命中不了的孤儿文件——不清理的话 `apk_icons` 目录的占用只增不减。
+     * 只在 [flush]（已持锁、且仅在淘汰发生时才可能产生新孤儿）里调用。
+     */
+    private fun deleteOrphanIcons() {
+        runCatching {
+            val liveKeys = diskIndex.keys
+            iconsDir.listFiles { f -> f.isFile && f.name.endsWith(".png") }
+                ?.forEach { f -> if (f.nameWithoutExtension !in liveKeys) f.delete() }
+        }
+    }
+
     /* ---------------------------------------------------------------- */
     /* 持久化                                                            */
     /* ---------------------------------------------------------------- */
@@ -184,6 +199,8 @@ class ApkMetadataCache private constructor(context: Context) {
                     val root = JSONObject(file.readText(Charsets.UTF_8))
                     if (root.optInt(FIELD_VERSION, -1) != CACHE_VERSION) {
                         file.delete()   // 结构升级，直接丢弃旧缓存
+                        // 索引已整体作废，图标与新条目无对应关系，一并重建
+                        runCatching { iconsDir.deleteRecursively() }
                         return@runCatching
                     }
                     val array = root.optJSONArray(FIELD_ENTRIES) ?: return@runCatching
@@ -199,6 +216,8 @@ class ApkMetadataCache private constructor(context: Context) {
                         .forEach { memory.put(it.key, it) }
                 }.onFailure {
                     runCatching { diskFile.delete() }   // JSON 损坏则重建
+                    // 索引不可信（此时 diskIndex 为空），图标无法反查归属，一并重建
+                    runCatching { iconsDir.deleteRecursively() }
                 }
             }
         }
@@ -216,6 +235,8 @@ class ApkMetadataCache private constructor(context: Context) {
                     if (snapshot.size > MAX_DISK_ENTRIES) {
                         snapshot.drop(MAX_DISK_ENTRIES).forEach { diskIndex.remove(it.key) }
                     }
+                    // 被淘汰条目的图标 PNG 已成孤儿，一并删除（见 deleteOrphanIcons）
+                    deleteOrphanIcons()
                     val array = JSONArray()
                     snapshot.take(MAX_DISK_ENTRIES).forEach { array.put(it.toJson()) }
                     val root = JSONObject()

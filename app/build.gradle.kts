@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+// AGP 9.0 起 Kotlin 支持内置（kotl.in/gradle/agp-built-in-kotlin），
+// 不再应用 org.jetbrains.kotlin.android 插件；编译选项走下方 kotlin { compilerOptions }。
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
 }
 
 // 仅在 CI 注入完整的 release 签名变量时启用发布签名；本地仍可正常 assembleRelease。
@@ -50,12 +53,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-
-    kotlinOptions {
-        jvmTarget = "17"
-        freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
-    }
-
     buildFeatures {
         viewBinding = true
     }
@@ -95,6 +92,14 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+    }
+}
+
+// Kotlin 2.x 编译器选项：android.kotlinOptions DSL 已弃用，统一走 compilerOptions
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
 

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bg_window"
     android:orientation="vertical">
 
     <!--
@@ -13,24 +14,27 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/brand"
+        android:background="@color/toolbar_bg"
         android:minHeight="?attr/actionBarSize"
         app:title="@string/app_name"
         app:titleTextColor="#FFFFFF" />
 
-    <!-- 目录选择：主界面唯一的配置项，其余规则设置已迁至设置页 -->
+    <!-- 目录选择卡片 -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        app:cardCornerRadius="14dp"
-        app:cardElevation="1dp">
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginVertical="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/divider"
+        app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="14dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -49,7 +53,7 @@
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="10dp"
                     android:layout_weight="1"
                     android:text="@string/rescan" />
             </LinearLayout>
@@ -58,7 +62,7 @@
                 android:id="@+id/tvFolder"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="10dp"
                 android:ellipsize="middle"
                 android:singleLine="true"
                 android:text="@string/no_folder"
@@ -67,7 +71,7 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 状态筛选 chip 组：横向滚动，单选 -->
+    <!-- 状态筛选 chip 组 -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -77,18 +81,19 @@
             android:id="@+id/chipGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="14dp"
+            android:paddingHorizontal="16dp"
             android:paddingVertical="4dp"
             app:singleSelection="true"
             app:selectionRequired="true" />
     </HorizontalScrollView>
 
+    <!-- Selection & status summary -->
     <TextView
         android:id="@+id/tvSelection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="14dp"
-        android:paddingBottom="2dp"
+        android:paddingHorizontal="16dp"
+        android:paddingBottom="4dp"
         android:textColor="@color/text_secondary"
         android:textSize="12sp" />
 
@@ -103,7 +108,7 @@
         android:id="@+id/tvStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="14dp"
+        android:paddingHorizontal="16dp"
         android:paddingVertical="6dp"
         android:text="@string/idle_hint"
         android:textColor="@color/text_secondary"
@@ -118,15 +123,17 @@
         android:paddingBottom="8dp"
         android:scrollbars="vertical" />
 
-    <!-- 底部操作条：吃 bottom inset（导航栏 / 手势条） -->
+    <!-- 底部操作条：Flat Design 用 1dp 顶部分隔线替代投影（bg_bottom_bar） -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
-        android:elevation="8dp"
+        android:background="@drawable/bg_bottom_bar"
+        android:elevation="0dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSelectAll"
@@ -136,13 +143,17 @@
             android:layout_weight="1"
             android:text="@string/select_all" />
 
+        <!-- 主 CTA 用 Flat Design 橙，深色文字保证对比度（on_accent） -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnExecute"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="10dp"
             android:layout_weight="1"
-            android:text="@string/execute" />
+            android:text="@string/execute"
+            android:textColor="@color/on_accent"
+            app:backgroundTint="@color/accent"
+            app:iconTint="@color/on_accent" />
     </LinearLayout>
 
 </LinearLayout>

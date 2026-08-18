@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    APK 列表项（Flat Design 重设计 2026-08）：
+    - minHeight 64dp：满足 Android 48dp 触控目标，行距更透气
+    - 48dp 图标 + 12dp 圆角占位底，与新配色体系一致
+    - 状态从彩色裸文字改为胶囊徽章（bg_status_pill，颜色由 ApkAdapter 按状态 tint）
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:gravity="center_vertical"
+    android:minHeight="64dp"
     android:orientation="horizontal"
-    android:paddingHorizontal="14dp"
-    android:paddingVertical="10dp">
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
 
-    <!-- 选择框：不参与点击，整行点击即切换选中（避免 CheckBox 与根布局双击） -->
+    <!-- Selection checkbox -->
     <CheckBox
         android:id="@+id/cbSelect"
         android:layout_width="wrap_content"
@@ -16,25 +23,40 @@
         android:clickable="false"
         android:focusable="false" />
 
-    <!-- 应用图标：解析成功后异步加载，未加载时显示占位背景 -->
-    <ImageView
-        android:id="@+id/ivIcon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+    <!-- App icon with rounded corners -->
+    <FrameLayout
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginStart="8dp"
-        android:background="@drawable/bg_icon_placeholder"
-        android:contentDescription="@string/app_icon_desc"
-        android:scaleType="centerCrop" />
+        android:clipChildren="true"
+        android:clipToPadding="false">
 
-    <TextView
-        android:id="@+id/tvBadge"
-        style="@style/BadgeText"
-        android:text="APK" />
+        <ImageView
+            android:id="@+id/ivIcon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_icon_placeholder"
+            android:contentDescription="@string/app_icon_desc"
+            android:scaleType="centerCrop" />
 
+        <!-- Archive type badge overlay on icon -->
+        <TextView
+            android:id="@+id/tvBadge"
+            style="@style/BadgeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:paddingHorizontal="5dp"
+            android:paddingVertical="2dp"
+            android:text="APK"
+            android:textSize="8sp" />
+    </FrameLayout>
+
+    <!-- Text content area -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="14dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -51,40 +73,48 @@
             android:id="@+id/tvTarget"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
             android:ellipsize="middle"
             android:singleLine="true"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvMeta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
+            android:layout_marginTop="2dp"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
     </LinearLayout>
 
-    <!-- 手动改名角标：仅当目标名来自用户手动输入时显示 -->
+    <!-- Manual rename badge -->
     <TextView
         android:id="@+id/tvManual"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:background="@drawable/bg_manual_badge"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="3dp"
         android:text="@string/manual_badge"
-        android:textColor="@color/brand"
+        android:textColor="@color/brand_oncontainer"
         android:textSize="10sp"
         android:textStyle="bold"
         android:visibility="gone" />
 
+    <!-- Status pill：底色 tint 由 ApkAdapter 按状态设置 -->
     <TextView
         android:id="@+id/tvState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
+        android:background="@drawable/bg_status_pill"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="3dp"
         android:textSize="11sp"
         android:textStyle="bold" />
 

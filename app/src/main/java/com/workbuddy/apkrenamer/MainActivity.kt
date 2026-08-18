@@ -7,8 +7,10 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -188,9 +190,13 @@ class MainActivity : AppCompatActivity() {
     /* ================================================================ */
 
     private fun observe() {
-        lifecycleScope.launchWhenStarted {
-            launch { vm.uiState.collect(::render) }
-            launch { vm.events.collect(::onEvent) }
+        // repeatOnLifecycle（与 TV 端一致）替代已弃用的 launchWhenStarted：
+        // STARTED 起收集、STOP 即取消，重建后 StateFlow 重放最新快照，行为不变
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch { vm.uiState.collect(::render) }
+                launch { vm.events.collect(::onEvent) }
+            }
         }
     }
 

@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# 同一分支 / PR 的新推送直接取消旧运行，不浪费配额
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,23 +17,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Set up JDK 17 (Temurin)
+      - name: Set up JDK 21 (Temurin)
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
+          # 缓存 Gradle 依赖与构建缓存（--no-daemon 下同样生效）
+          cache: 'gradle'
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
+      # Robolectric 运行时把 android-all 沙箱 jar 下载到 ~/.m2（每次全量百余 MB），
+      # 按版本缓存可显著缩短冷启动测试时间
+      - name: Cache Robolectric android-all artifacts
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ runner.os }}-4.14.1-v1
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Compile debug Kotlin
-        run: ./gradlew :app:compileDebugKotlin --no-daemon --stacktrace
-
-      - name: Run unit tests (Robolectric)
-        run: ./gradlew :app:testDebugUnitTest --no-daemon --stacktrace
+      # 编译与测试合并为一次 Gradle 调用：共享配置阶段与 JVM 启动，
+      # 编译失败仍会让本步骤直接红掉，日志里同样可见
+      - name: Build and unit tests (Robolectric)
+        run: ./gradlew :app:compileDebugKotlin :app:testDebugUnitTest --no-daemon --stacktrace
         env:
           # 每 fork 独立限堆 1g 由 build.gradle.kts 配置；CI 上按核数调大并行
           GRADLE_TEST_PARALLEL_FORKS: '4'

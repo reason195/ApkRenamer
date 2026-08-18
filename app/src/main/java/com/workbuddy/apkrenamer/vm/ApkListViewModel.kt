@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.workbuddy.apkrenamer.cache.ApkMetadataCache
@@ -27,6 +28,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+
+/** 批量重命名过程中的 UI 刷新间隔（ms）：进度按时间节流，避免大列表反复全量重投影 */
+private const val RENAME_UI_INTERVAL_MS = 100L
 
 /**
  * 手机端与 TV 端**共享**的业务编排层（Q8 / RQ-T7-6）。
@@ -567,6 +571,9 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
             working.forEachIndexed { i, it -> indexOf[it.documentId] = i }
 
             try {
+                // 按时间节流刷新：SAF 重命名本身是几十 ms 一次的 IPC，若每条都
+                // 全量重投影（排序 + 重复包 + 计数），大列表下主线程要吃 O(n²) 的重算
+                var lastUiAt = 0L
                 targets.forEachIndexed { index, item ->
                     val newName = item.targetName ?: return@forEachIndexed
                     val pos = indexOf[item.documentId] ?: return@forEachIndexed
@@ -602,11 +609,15 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
                         }
                     )
 
-                    items = working.toList()
-                    setPhase(
-                        Phase.RENAMING, index + 1, targets.size,
-                        "重命名中 ${index + 1}/${targets.size} · 成功 $success 失败 $failed"
-                    )
+                    val now = SystemClock.elapsedRealtime()
+                    if (now - lastUiAt >= RENAME_UI_INTERVAL_MS) {
+                        lastUiAt = now
+                        items = working.toList()
+                        setPhase(
+                            Phase.RENAMING, index + 1, targets.size,
+                            "重命名中 ${index + 1}/${targets.size} · 成功 $success 失败 $failed"
+                        )
+                    }
                 }
 
                 items = working.toList()
@@ -618,6 +629,8 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
             } catch (t: Throwable) {
                 setPhase(Phase.IDLE, 0, 0, "重命名中断：${t.message}")
             } finally {
+                // 取消 / 中断也要把已落地的那部分重命名同步进列表，再退出忙态
+                items = working.toList()
                 if (phase != Phase.IDLE) setPhase(Phase.IDLE, 0, 0, statusText)
             }
         }
@@ -630,6 +643,9 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
     fun clearCache() {
         viewModelScope.launch {
             cache.clear()
+            // 图标文件已全部删除：作废路径 memo 并递增纪元，强迫下一次投影重查
+            iconPathMemo.clear()
+            iconEpoch++
             statusText = "缓存已清空，下次扫描将重新解析"
             publish()
             _events.emit(UiEvent.Toast("缓存已清空"))
@@ -657,29 +673,64 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /**
+     * 一次全量投影的结果。输入签名（items 引用 + 选中 / 手动名快照 + 筛选 / 排序 +
+     * 图标纪元）不变时整体复用——解析 / 重命名期间的进度 tick 只改 phase / progress /
+     * statusText，不必每次都重算排序、重复包、计数与图标路径。
+     */
+    private class ProjectionSnapshot(
+        val itemsRef: List<ApkItem>,
+        val selection: Set<String>,
+        val manualKeys: Set<String>,
+        val filter: StatusFilter,
+        val sortKey: SortKey,
+        val sortDirection: SortDirection,
+        val iconEpoch: Long,
+        val allRows: List<ApkRow>,
+        val visible: List<ApkRow>,
+        val visibleIds: Set<String>,
+        val counts: Counts
+    )
+
+    private var projectionSnapshot: ProjectionSnapshot? = null
+
+    /** 图标纪元：清空缓存会使全部图标文件失效，投影必须重算（iconPath memo 一并作废） */
+    private var iconEpoch: Long = 0L
+
+    /**
+     * 图标路径 memo（cache key → 路径；null = 已确认无文件）。
+     * `iconFileOf` 底层是 `File.isFile` 磁盘 I/O，不能在每次 publish 里对每行重复做——
+     * 解析进度每 50ms 推一帧，上千行 × 每帧一次 stat 足以拖卡主线程。
+     */
+    private val iconPathMemo = HashMap<String, String?>()
+
+    private fun iconPathFor(item: ApkItem): String? {
+        if (item.meta?.hasIcon != true) return null
+        val key = cache.keyOf(item.cacheSeed)
+        return iconPathMemo.getOrPut(key) { cache.iconFileOf(key)?.absolutePath }
+    }
+
+    /**
      * 把内部真源投影成 [ListUiState] 并推给两端。
      *
      * 每次都重建整个快照而不是增量 `copy`：状态字段之间存在派生关系
      * （可见行 → 可执行数 → 隐藏已选数），增量更新极易漏算某一项。
-     * 列表规模是百级，全量重算的开销可以忽略。
+     * 但**重投影本身**（排序 / 重复包 / 计数 / 图标路径）有输入签名兜底：
+     * 签名不变（典型：只变了进度数字的 tick）时复用 [ProjectionSnapshot]，
+     * 上千文件的列表也不会在主线程反复重算。
      */
     private fun publish() {
-        val dupIds = ListProjection.duplicateIdsOf(items)
-        val allRows = ListProjection.sortRows(currentRows(), sortKey, sortDirection).map { row ->
-            row.copy(
-                duplicate = row.id in dupIds,
-                // 有图标标记时才查一次文件系统；没有标记 / 文件已丢失都回落 null（占位图）
-                iconPath = if (row.item.meta?.hasIcon == true) {
-                    cache.iconFileOf(cache.keyOf(row.item.cacheSeed))?.absolutePath
-                } else null
-            )
-        }
-        val visible = ListProjection.applyFilter(allRows, filter)
-        val visibleIds = visible.mapTo(HashSet(visible.size)) { it.id }
+        val selection = LinkedHashSet(selectedIds)
+        val manualKeys = HashSet(manualTargets.keys)
+
+        val snapshot = projectionSnapshot?.takeIf { s ->
+            s.itemsRef === items && s.selection == selection && s.manualKeys == manualKeys &&
+                s.filter == filter && s.sortKey == sortKey && s.sortDirection == sortDirection &&
+                s.iconEpoch == iconEpoch
+        } ?: rebuildProjection(selection, manualKeys)
 
         _uiState.value = ListUiState(
             treeUri = treeUri,
-            rows = visible,
+            rows = snapshot.visible,
             filter = filter,
             sortKey = sortKey,
             sortDirection = sortDirection,
@@ -687,13 +738,29 @@ class ApkListViewModel(app: Application) : AndroidViewModel(app) {
             progress = progress,
             progressMax = progressMax,
             statusText = statusText,
-            counts = ListProjection.countsOf(allRows),
+            counts = snapshot.counts,
             totalCount = items.size,
             selectedCount = selectedIds.size,
-            executableCount = ListProjection.executableRows(visible).size,
-            hiddenSelectedCount = selectedIds.count { it !in visibleIds },
+            executableCount = ListProjection.executableRows(snapshot.visible).size,
+            hiddenSelectedCount = selectedIds.count { it !in snapshot.visibleIds },
             manualCount = manualTargets.size
         )
+    }
+
+    private fun rebuildProjection(selection: Set<String>, manualKeys: Set<String>): ProjectionSnapshot {
+        val dupIds = ListProjection.duplicateIdsOf(items)
+        val allRows = ListProjection.sortRows(currentRows(), sortKey, sortDirection).map { row ->
+            row.copy(
+                duplicate = row.id in dupIds,
+                iconPath = iconPathFor(row.item)
+            )
+        }
+        val visible = ListProjection.applyFilter(allRows, filter)
+        val visibleIds = visible.mapTo(HashSet(visible.size)) { it.id }
+        return ProjectionSnapshot(
+            items, selection, manualKeys, filter, sortKey, sortDirection, iconEpoch,
+            allRows, visible, visibleIds, ListProjection.countsOf(allRows)
+        ).also { projectionSnapshot = it }
     }
 
     private fun emitToast(text: String) {

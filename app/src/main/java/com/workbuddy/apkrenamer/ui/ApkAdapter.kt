@@ -1,5 +1,6 @@
 package com.workbuddy.apkrenamer.ui
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -84,26 +85,31 @@ class ApkAdapter(
                 append("待解析")
             }
             append(" · ").append(item.readableSize())
-            if (meta?.fromCache == true) append(" · ⚡缓存")
+            if (meta?.fromCache == true) append(" · 缓存命中")
             if (item.relativePath.isNotEmpty()) append(" · /").append(item.relativePath)
         }
 
-        val (text, colorRes) = stateTextColor(row.status)
+        val (text, colorRes, bgRes) = stateStyle(row.status)
         b.tvState.text = text
         b.tvState.setTextColor(ContextCompat.getColor(ctx, colorRes))
+        b.tvState.backgroundTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(ctx, bgRes))
 
         // 整行点击切换选中；长按打开手动改名对话框
         b.root.setOnClickListener { onToggle(row.id) }
         b.root.setOnLongClickListener { onLongPress(row.id); true }
     }
 
-    /** 展示状态 → （文案，颜色）。优先使用 [RowStatus.label] 保持两端一致。 */
-    private fun stateTextColor(status: RowStatus): Pair<String, Int> = when (status) {
-        RowStatus.PENDING -> "待解析" to R.color.text_secondary
-        RowStatus.NEEDS_RENAME -> "待改名" to R.color.warning
-        RowStatus.NO_CHANGE -> "无需改" to R.color.text_secondary
-        RowStatus.DONE -> "已完成" to R.color.success
-        RowStatus.FAILED -> "失败" to R.color.danger
+    /**
+     * 展示状态 → （文案，胶囊文字色，胶囊底色）。优先使用 [RowStatus.label] 保持两端一致。
+     * 文字色与底色配对定义于 colors.xml（* 与 *_bg 成对，日/夜各自可读）。
+     */
+    private fun stateStyle(status: RowStatus): Triple<String, Int, Int> = when (status) {
+        RowStatus.PENDING -> Triple("待解析", R.color.text_secondary, R.color.neutral_bg)
+        RowStatus.NEEDS_RENAME -> Triple("待改名", R.color.warning, R.color.warning_bg)
+        RowStatus.NO_CHANGE -> Triple("无需改", R.color.text_secondary, R.color.neutral_bg)
+        RowStatus.DONE -> Triple("已完成", R.color.success, R.color.success_bg)
+        RowStatus.FAILED -> Triple("失败", R.color.danger, R.color.danger_bg)
     }
 
     companion object {
