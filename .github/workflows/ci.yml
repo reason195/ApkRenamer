@@ -25,8 +25,9 @@ jobs:
           # 缓存 Gradle 依赖与构建缓存（--no-daemon 下同样生效）
           cache: 'gradle'
 
+      # v4.0.2 起修掉 cmdline-tools 不再自带 tools 包的问题，v3 在 ubuntu-latest 上会红
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       # Robolectric 运行时把 android-all 沙箱 jar 下载到 ~/.m2（每次全量百余 MB），
       # 按版本缓存可显著缩短冷启动测试时间

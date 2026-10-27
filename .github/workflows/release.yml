@@ -25,8 +25,9 @@ jobs:
           java-version: "21"
           cache: "gradle"
 
+      # v4.0.2 起修掉 cmdline-tools 不再自带 tools 包的问题，v3 在 ubuntu-latest 上会红
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
