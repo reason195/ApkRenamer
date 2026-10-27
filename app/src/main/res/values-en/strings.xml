@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">APK Batch Renamer</string>
+    <!-- app_name 品牌名不翻译，统一用 values/strings.xml 中的 "APK Renamer" -->
     <string name="pick_folder">Select folder</string>
     <string name="rescan">Rescan</string>
     <string name="no_folder">No folder has been authorized</string>

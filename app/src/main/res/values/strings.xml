@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">APK 批量重命名</string>
+    <!-- 品牌名不随语言变化：launcher 与工具栏都用它 -->
+    <string name="app_name">APK Renamer</string>
 
     <string name="pick_folder">选择文件夹</string>
     <string name="rescan">重新扫描</string>
