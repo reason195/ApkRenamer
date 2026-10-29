@@ -5,7 +5,9 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import com.workbuddy.apkrenamer.cache.ApkMetadataCache
@@ -83,6 +85,9 @@ object MetaExtractor {
 
     /** 单个图标 PNG 上限，超出丢弃（防畸形资源表） */
     private const val MAX_ICON_BYTES = 512 * 1024
+
+    /** 提取图标的最长边：展示端只解到 96px，原图动辄 512px+，白占缓存体积 */
+    private const val MAX_ICON_EDGE = 256
 
     private val BUNDLE_JSON_NAMES = setOf(
         "info.json",          // APKMirror .apkm
@@ -307,12 +312,46 @@ object MetaExtractor {
             } else {
                 resources.getDrawable(appInfo.icon)
             }
-            val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return@runCatching null
+            val bitmap = drawableToBitmap(drawable) ?: return@runCatching null
             val out = ByteArrayOutputStream()
             if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)) return@runCatching null
             if (out.size() > MAX_ICON_BYTES) return@runCatching null
             out.toByteArray()
         }.getOrNull()
+
+    /**
+     * Drawable → 可编码的 Bitmap，等比压到最长边 [MAX_ICON_EDGE]。
+     *
+     * 只有位图图标才是 BitmapDrawable；现代 APK 多为 AdaptiveIconDrawable /
+     * VectorDrawable，必须自己画到 Canvas 上取像素，否则列表恒显示占位图。
+     * 测试用 internal，其余调用方一律走 [extractIconPng]。
+     */
+    internal fun drawableToBitmap(drawable: Drawable): Bitmap? {
+        (drawable as? BitmapDrawable)?.bitmap?.let { src ->
+            if (src.isRecycled) return null
+            if (maxOf(src.width, src.height) <= MAX_ICON_EDGE) return src
+            val (w, h) = fitWithin(src.width, src.height, MAX_ICON_EDGE)
+            return Bitmap.createScaledBitmap(src, w, h, true)
+        }
+
+        val iw = drawable.intrinsicWidth
+        val ih = drawable.intrinsicHeight
+        // 无固有尺寸（未定尺寸的矢量图）时退化为正方形，否则画出来是 0 像素
+        val (w, h) = if (iw > 0 && ih > 0) fitWithin(iw, ih, MAX_ICON_EDGE)
+        else MAX_ICON_EDGE to MAX_ICON_EDGE
+        return runCatching {
+            val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            drawable.setBounds(0, 0, w, h)
+            drawable.draw(Canvas(bitmap))
+            bitmap
+        }.getOrNull()
+    }
+
+    /** 等比缩放到最长边不超过 [max]，返回 (宽, 高)，至少 1px。 */
+    private fun fitWithin(width: Int, height: Int, max: Int): Pair<Int, Int> {
+        val scale = minOf(1f, max.toFloat() / maxOf(width, height))
+        return maxOf(1, (width * scale).toInt()) to maxOf(1, (height * scale).toInt())
+    }
 
     @Suppress("DEPRECATION")
     private fun PackageInfo.longVersionCodeCompat(): Long =

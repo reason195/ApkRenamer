@@ -344,8 +344,12 @@ class ApkMetadataCache private constructor(context: Context) {
         private const val MAX_ICON_BYTES = 512 * 1024
 
         private const val CACHE_FILE = "apk_meta_cache.json"
-        /** v2：新增 hasIcon 字段，旧缓存（无图标标记）直接作废重建 */
-        private const val CACHE_VERSION = 2
+        /**
+         * v2：新增 hasIcon 字段，旧缓存（无图标标记）直接作废重建
+         * v3：图标提取改为兼容 AdaptiveIconDrawable / VectorDrawable，
+         *     v2 里这些应用被记成「无图标」，不重建就永远显示占位图
+         */
+        private const val CACHE_VERSION = 3
         private const val ICONS_DIR = "apk_icons"
         private const val KEY_LENGTH = 32
 
